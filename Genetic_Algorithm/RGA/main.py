@@ -1,27 +1,35 @@
 import numpy as np
 import scipy 
-
-
+import matplotlib.pyplot as plt
+import random
+import pandas as pd
 class GeneticAlgorithm_Base:
-    def __init__(self,dim=1,population_size=500,max_intr=100,xlb=[-200,-2,0,-2],
-    xUb=[200,2,1,2],Tournament_Selection_Size=2,MUTATION_RATE=0.25,mutant_sigma=[0.5,0.5,0.5,0.5],blx_alpha=0.5):
-        # self.generation_number=generation_number
-        self.population_size=population_size # is  should be in even
-        self.max_intr=max_intr
-        self.xLowerList=xlb
-        self.xUpperList=xUb
-        self.Tournament_Selection_Size=Tournament_Selection_Size
-        self.MUTATION_RATE=0.25
-        self.mutant_sigma=mutant_sigma
-        self.blx_alpha=blx_alpha
-        self.NUMBER_OF_ELITE_CHROMOSOMES=1
-        self.Pc=0.9
-        self.dim=dim
-        self.__fun=0
     @classmethod
-    def _get_population(cls,a):
-        cls.sanjay=a
-        return cls.sanjay
+    def _get_userInputs(cls,f,dim=1,population_size=500,max_intr=1,xlb=[-200,-2,0,-2],
+    xUb=[200,2,1,2],Tournament_Selection_Size=2,MUTATION_RATE=0.25,
+    mutant_sigma=[0.5,0.5,0.5,0.5],blx_alpha=0.5
+    ,dir_name_save="E:\Work\Code\Hybrid_sensors_model"):
+        cls.population_size=population_size
+        cls.max_intr=max_intr
+        cls.xLowerList=xlb
+        cls.xUpperList=xUb
+        cls.Tournament_Selection_Size=Tournament_Selection_Size
+        cls.MUTATION_RATE=0.25
+        cls.mutant_sigma=mutant_sigma
+        cls.blx_alpha=blx_alpha
+        cls.NUMBER_OF_ELITE_CHROMOSOMES=1
+        cls.Pc=0.9
+        cls.dim=dim
+        cls.f=f
+        cls.dir_name=dir_name_save
+    # def __init__(self,:
+    #     # self.generation_number=generation_number
+    #     self.population_size=population_size # is  should be in even
+        
+    # @classmethod
+    # def _get_population(cls,a):
+    #     cls.sanjay=a
+    #     return cls.sanjay
     
 
     
@@ -30,13 +38,12 @@ class Chromosome:
     def __init__(self):
         self._genes=[]
         self._fitness=0
-        for i in range(GeneticAlgorithm_parameters().dim):
-            a=np.random.uniform(low=GeneticAlgorithm_parameters().xLowerList[i], high=GeneticAlgorithm_parameters().xUpperList[i])
+        for i in range(GeneticAlgorithm_Base.dim):
+            a=np.random.uniform(low=GeneticAlgorithm_Base.xLowerList[i], high=GeneticAlgorithm_Base.xUpperList[i])
             self._genes.append(a)
 
     def get_fitness(self):
-        # GeneticAlgorithm_parameters().get_fitness_function
-        self._fitness=demo_func(self._genes)#GeneticAlgorithm_parameters().get_f(self._genes)#100*(self._genes[1]-self._genes[0]**2)**2+(1-self._genes[0])**2 
+        self._fitness=GeneticAlgorithm_Base.f(self._genes)#GeneticAlgorithm_Base.get_f(self._genes)#100*(self._genes[1]-self._genes[0]**2)**2+(1-self._genes[0])**2 
         return self._fitness
 
     def get_genes(self):
@@ -65,8 +72,8 @@ class GeneticAlgorithm:
     def _select_tournament_population(pop):
         tournament_pop=Population(0)
         i=0
-        while i < GeneticAlgorithm_parameters().Tournament_Selection_Size:
-            tournament_pop.get_chromosomes().append(pop.get_chromosomes()[random.randrange(0,GeneticAlgorithm_parameters().population_size)])
+        while i < GeneticAlgorithm_Base.Tournament_Selection_Size:
+            tournament_pop.get_chromosomes().append(pop.get_chromosomes()[random.randrange(0,GeneticAlgorithm_Base.population_size)])
             i+=1
         tournament_pop.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
         return tournament_pop
@@ -76,11 +83,11 @@ class GeneticAlgorithm:
     @staticmethod
     def _crossover_population(pop):
         crossover_pop=Population(0) # HERE I DEFINED the empty chromosomes when put the zero
-        for i in range(GeneticAlgorithm_parameters().NUMBER_OF_ELITE_CHROMOSOMES):
+        for i in range(GeneticAlgorithm_Base.NUMBER_OF_ELITE_CHROMOSOMES):
             crossover_pop.get_chromosomes().append(pop.get_chromosomes()[i]) ## we will move this chromose to the next gen
-        i=GeneticAlgorithm_parameters().NUMBER_OF_ELITE_CHROMOSOMES
+        i=GeneticAlgorithm_Base.NUMBER_OF_ELITE_CHROMOSOMES
         ## here we will exclude the elite chromsome
-        while i < GeneticAlgorithm_parameters().population_size:
+        while i < GeneticAlgorithm_Base.population_size:
             # crossover population will have population after the selection.Then we select the best 2 Chromosome
             chromosome1=GeneticAlgorithm._select_tournament_population(pop).get_chromosomes()[0] # here we call to the _tournament_population
             chromosome2=GeneticAlgorithm._select_tournament_population(pop).get_chromosomes()[0]
@@ -90,7 +97,7 @@ class GeneticAlgorithm:
     #creating the Mutation Population:
     @staticmethod
     def _mutate_population(pop):
-        for i in range(GeneticAlgorithm_parameters().NUMBER_OF_ELITE_CHROMOSOMES,GeneticAlgorithm_parameters().population_size):# EXCLUDE THE ELITE CHROMOSOME
+        for i in range(GeneticAlgorithm_Base.NUMBER_OF_ELITE_CHROMOSOMES,GeneticAlgorithm_Base.population_size):# EXCLUDE THE ELITE CHROMOSOME
             GeneticAlgorithm._Normaldistribution_mutate_chromosome(pop.get_chromosomes()[i])
         return pop
     
@@ -140,7 +147,7 @@ class GeneticAlgorithm:
                 p1=x2
             # dt= a*(p2-p1) # define dt 
             u=random.random() # randomly picked the 
-            gamma=(1+2*GeneticAlgorithm_parameters().blx_alpha)*u-GeneticAlgorithm_parameters().blx_alpha
+            gamma=(1+2*GeneticAlgorithm_Base.blx_alpha)*u-GeneticAlgorithm_Base.blx_alpha
             crossover_chrom.get_genes()[i]=p1*(1-gamma)+gamma*p2
             # print(crossover_chrom.get_genes()[i])
         return crossover_chrom
@@ -149,18 +156,18 @@ class GeneticAlgorithm:
     @staticmethod
     def _Normaldistribution_mutate_chromosome(chromosome):
         for i in range(chromosome.get_genes().__len__()):
-            chromosome.get_genes()[i]=chromosome.get_genes()[i]+np.random.normal(0, GeneticAlgorithm_parameters().mutant_sigma[i])
-            if chromosome.get_genes()[i] > GeneticAlgorithm_parameters().xUpperList[i]:
-                chromosome.get_genes()[i]=GeneticAlgorithm_parameters().xUpperList[i]
-            if chromosome.get_genes()[i] < GeneticAlgorithm_parameters().xLowerList[i]:
-                chromosome.get_genes()[i]=GeneticAlgorithm_parameters().xLowerList[i]
+            chromosome.get_genes()[i]=chromosome.get_genes()[i]+np.random.normal(0, GeneticAlgorithm_Base.mutant_sigma[i])
+            if chromosome.get_genes()[i] > GeneticAlgorithm_Base.xUpperList[i]:
+                chromosome.get_genes()[i]=GeneticAlgorithm_Base.xUpperList[i]
+            if chromosome.get_genes()[i] < GeneticAlgorithm_Base.xLowerList[i]:
+                chromosome.get_genes()[i]=GeneticAlgorithm_Base.xLowerList[i]
     
     @staticmethod
     def _survivorStage(oldpop,newpop):
         survivalPop=Population(0)
         oldpop.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
         newpop.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
-        n=GeneticAlgorithm_parameters().population_size//2
+        n=GeneticAlgorithm_Base.population_size//2
         i=0
         while i < n:
             survivalPop.get_chromosomes().append(oldpop.get_chromosomes()[i])
@@ -182,33 +189,35 @@ def _print_population(pop, gen_number):
         print("Chromosome #",i,":", x, "| fitness :", x.get_fitness())
         i+=1
 
-def GA_RUN():
-    population=Population(GeneticAlgorithm_parameters().population_size)
+
+def GA_RUN(ifsaveReport=False):
+    # Inital Population
+    population=Population(GeneticAlgorithm_Base.population_size)
+    # Sorting the Initial Population
     population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
+    # Priniting the Initial Population
     _print_population(population,0)
-    dir_name=os.path.join("E:\Work\Work\\Nicolas_opti_results\\ZZ\\","F_"+str(int(nFreq*1e-3))+'_KHz')
-    os.mkdir(dir_name)
+    #------------------Report making
+    report={'Fitness':[], 'X0':[],'X1':[],'X2':[]}
+    # for NoVar in range(GeneticAlgorithm_Base.population_size):
+    #     report['X'+str(NoVar)]
+    #-----------------------
     generation_number=1
     plt.figure()
-    dict_save={'Fitness':[], 'BestVar':[]}
-    while generation_number< GeneticAlgorithm_parameters().max_intr:
+    while generation_number< GeneticAlgorithm_Base.max_intr:
         population=GeneticAlgorithm().evolve(population)
         population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
-
+        #--------------------------------saving the data-------------------------
+        report['Fitness']=population.get_chromosomes()[0].get_fitness()
+        for No_var,Varb in enumerate(np.array(population.get_chromosomes()[0].get_genes())):
+            report['X'+str(No_var)].append((Varb))
+        #----------------
         plt.scatter(generation_number,population.get_chromosomes()[0].get_fitness() )
         _print_population(population,generation_number)
         plt.pause(0.01)
         generation_number+=1
-        # dict_save['BestVar']=population.get_chromosomes()[0]
-        dict_save['Fitness'].append(population.get_chromosomes()[0].get_fitness())
-        dict_save['BestVar'].append(population.get_chromosomes()[0])
-        data_best=pd.DataFrame.from_dict(dict_save)
-        data_best.to_csv(dir_name+'\\'+'Best_solution.csv')
-        # np.save(dir_name+'\\'+'Best_solution.csv',[population.get_chromosomes()[0],])
+        # np.save('Best_solution.csv',[population.get_chromosomes()[0],])
         print('Minmization -- at the function :',population.get_chromosomes()[0])
-        plt.savefig(dir_name+'\\'+'covergancePlot.png')
-
-if __name__=='__main__':
-    GA1=GeneticAlgorithm_Base()
-    print(type(GeneticAlgorithm_Base()))
-    print(GeneticAlgorithm_Base._get_population(1))
+    if ifsaveReport:
+        data_best=pd.DataFrame.from_dict(report)
+        data_best.to_csv(GeneticAlgorithm_Base.dir_name+'\\'+'Best_solution.csv')
