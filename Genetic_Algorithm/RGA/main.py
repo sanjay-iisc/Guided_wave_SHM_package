@@ -1,9 +1,14 @@
+from matplotlib import markers
 import numpy as np
 import scipy 
 import matplotlib.pyplot as plt
 import random
 import pandas as pd
+import matplotlib.animation as animation
 class GeneticAlgorithm_Base:
+    """
+    firstly defined the vvariable which to be saved.
+    """
     @classmethod
     def _get_userInputs(cls,f,dim=1,population_size=500,max_intr=1,xlb=[-200,-2,0,-2],
     xUb=[200,2,1,2],Tournament_Selection_Size=2,MUTATION_RATE=0.25,
@@ -22,18 +27,8 @@ class GeneticAlgorithm_Base:
         cls.dim=dim
         cls.f=f
         cls.dir_name=dir_name_save
-    # def __init__(self,:
-    #     # self.generation_number=generation_number
-    #     self.population_size=population_size # is  should be in even
         
-    # @classmethod
-    # def _get_population(cls,a):
-    #     cls.sanjay=a
-    #     return cls.sanjay
-    
-
-    
-
+# Generate the Chromosome Class
 class Chromosome:
     def __init__(self):
         self._genes=[]
@@ -51,7 +46,7 @@ class Chromosome:
     
     def __str__(self):
         return self._genes.__str__()
-
+# Generate the Population Class
 class Population:
     def __init__(self,size):
         self._chromosomes=[]
@@ -61,8 +56,10 @@ class Population:
             i+=1
     def get_chromosomes(self):return self._chromosomes
 
+# Main Class of the Genetic Algorithm
 class GeneticAlgorithm:
     @staticmethod
+    ## Evolve the Population
     def evolve(pop):
         # return GeneticAlgorithm._crossover_population(pop)
         newPop=GeneticAlgorithm._mutate_population(GeneticAlgorithm._crossover_population(pop))
@@ -178,46 +175,67 @@ class GeneticAlgorithm:
             j+=1
         return survivalPop
 
-
-
-def _print_population(pop, gen_number):
-    print('\n------------------------------------------------')
-    print("Generation #", gen_number, "|Fittest Chromosome fitness :", pop.get_chromosomes()[0].get_fitness())
-    print("---------------------------------------------------")
-    i=0
-    for x in pop.get_chromosomes():
-        print("Chromosome #",i,":", x, "| fitness :", x.get_fitness())
-        i+=1
-
-
-def GA_RUN(ifsaveReport=False):
-    # Inital Population
-    population=Population(GeneticAlgorithm_Base.population_size)
-    # Sorting the Initial Population
-    population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
-    # Priniting the Initial Population
-    _print_population(population,0)
-    #------------------Report making
-    report={'Fitness':[], 'X0':[],'X1':[],'X2':[]}
-    # for NoVar in range(GeneticAlgorithm_Base.population_size):
-    #     report['X'+str(NoVar)]
-    #-----------------------
-    generation_number=1
-    plt.figure()
-    while generation_number< GeneticAlgorithm_Base.max_intr:
-        population=GeneticAlgorithm().evolve(population)
+class GA_strat:
+    def __init__(self,ifsaveReport=False):
+        self.ifsaveReport=ifsaveReport
+    
+    def inital_population(n):
+        # Inital Population
+        population=Population(GeneticAlgorithm_Base.population_size)
+        # Sorting the Initial Population
         population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
-        #--------------------------------saving the data-------------------------
-        report['Fitness']=population.get_chromosomes()[0].get_fitness()
-        for No_var,Varb in enumerate(np.array(population.get_chromosomes()[0].get_genes())):
-            report['X'+str(No_var)].append((Varb))
-        #----------------
-        plt.scatter(generation_number,population.get_chromosomes()[0].get_fitness() )
-        _print_population(population,generation_number)
-        plt.pause(0.01)
-        generation_number+=1
-        # np.save('Best_solution.csv',[population.get_chromosomes()[0],])
-        print('Minmization -- at the function :',population.get_chromosomes()[0])
-    if ifsaveReport:
-        data_best=pd.DataFrame.from_dict(report)
-        data_best.to_csv(GeneticAlgorithm_Base.dir_name+'\\'+'Best_solution.csv')
+        # Priniting the Initial Population
+        self._print_population(population,0)
+
+
+    def RUN(self):
+        # Inital Population
+        population=Population(GeneticAlgorithm_Base.population_size)
+        # Sorting the Initial Population
+        population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
+        # Priniting the Initial Population
+        self._print_population(population,0)
+        report={'Fitness':[], 'X0':[],'X1':[],'X2':[]}
+        generation_number=1
+        count=[]
+        count.append(generation_number)
+        plt.figure()
+        ax=plt.gca()
+        # line, = ax.plot([], [], lw=2)
+        while generation_number< GeneticAlgorithm_Base.max_intr:
+            population=GeneticAlgorithm().evolve(population)
+            population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
+            #--------------------------------saving the data-------------------------
+            report['Fitness'].append(population.get_chromosomes()[0].get_fitness())
+            for No_var,Varb in enumerate(np.array(population.get_chromosomes()[0].get_genes())):
+                report['X'+str(No_var)].append((Varb))
+            #----------------
+            # line=self.setting_line(line)
+            ax.clear()
+            ax.plot(count,report['Fitness'], marker='o', markersize=0.5, c='k')
+            ax.set_xlabel('# Iter')
+            ax.set_ylabel('Fitness Value')
+            ax.set_title('Convergance Plot')
+            self._print_population(population,generation_number)
+            plt.pause(0.01)
+            generation_number+=1
+            count.append(generation_number)
+            # np.save('Best_solution.csv',[population.get_chromosomes()[0],])
+            print('Minmization -- at the function :',population.get_chromosomes()[0])
+        if self.ifsaveReport:
+            data_best=pd.DataFrame.from_dict(report)
+            data_best.to_csv(GeneticAlgorithm_Base.dir_name+'\\'+'Best_solution.csv')
+    
+    def setting_line(self,line):
+        line.set_data([], [])
+        return line,
+    
+    def _print_population(self,pop, gen_number):
+        print('\n------------------------------------------------')
+        print("Generation #", gen_number, "|Fittest Chromosome fitness :", pop.get_chromosomes()[0].get_fitness())
+        print("---------------------------------------------------")
+        i=0
+        for x in pop.get_chromosomes():
+            print("Chromosome #",i,":", x, "| fitness :", x.get_fitness())
+
+

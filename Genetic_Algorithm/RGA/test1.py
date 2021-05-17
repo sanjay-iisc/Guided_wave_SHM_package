@@ -1,8 +1,11 @@
 import main as GA
 import numpy as np
+import matplotlib.pyplot as plt
 def fz (x):
         # p1,p2,p3=x
-        return np.sum(-np.array(x)**2)
-GA.GeneticAlgorithm_Base._get_userInputs(fz,dim=1,max_intr=50,population_size=8)
+        return np.sum(np.array(x)**2)
+GA.GeneticAlgorithm_Base._get_userInputs(fz,dim=3,max_intr=500,population_size=100)
 # print('sa'
-GA.GA_RUN()
+GA1=GA.GA_strat()
+GA1.RUN()
+plt.show()
