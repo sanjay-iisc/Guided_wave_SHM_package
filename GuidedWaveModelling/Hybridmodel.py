@@ -241,42 +241,22 @@ class WaveField:
         stressMatrix = np.array ([t11(f) , t22(f)],dtype = complex)
         Mat_stress=stressMatrix.reshape((2,1))
         return Mat_stress   
-        
-    def constant_stress(self, alpha=4):
-        shai = (self.E*self.d)/ ((1/self.s11e)*self.hp )
-        # (shai+alpha)
-        # Constant value of the pin force
-        # alpha  = 4 for both modes, 1 is for symmetric and 3 is for antisym
-        # Plate constants        
-        # t = 1.5e-3# host thickness
-        # nu =0.33 # plate
-        # Ea = (1/ (1.60e-11)) # pizo elastic modulus
-        # E = self.E #host elastic modulus
 
-        # #Coupling constants
-        # nuA= 0.33 # adhesive
-        # Eb = 3e9 # Elastic moduluse of adhesive PA*(1+0.05j)*
-        # tb = 25e-6 # bond thickness
-        # nub = 0.3 # poisson ratio
-        # Gb = Eb/ (2 *(1+nub))
-
-        # # pzt constants
-        # a=self.a
-        # hp=self.hp
-        # d31 = self.d31
-        # V = 1 # volt
+    def S0_Stress_from_optimized(self,f):
+        FemFreq =np.arange(5, 1000, 20)*1e3
+        t11=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSR_optimized.npy"))
+        t22=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSZ_optimized.npy"))
+        stressMatrix = np.array ([t11(f) , t22(f)],dtype = complex)
+        Mat_stress=stressMatrix.reshape((2,1))
+        return Mat_stress
+    def A0_Stress_from_optimized(self,f):
+        FemFreq = np.arange(5, 1000, 20)*1e3
+        t11=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAR_optimized.npy"))
+        t22=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAZ_optimized.npy"))
+        stressMatrix = np.array ([t11(f) , t22(f)],dtype = complex)
+        Mat_stress=stressMatrix.reshape((2,1))
+        return Mat_stress   
         
-        # esia= (d31*V)/(hp) # strain piezo tip see paper [1]
-        
-        # shai = (E*t/  (1- nu**2))/ (Ea*hp/  (1- nuA**2) ) # Psi of equation 10 of [1]
-                
-        # shearLagA0 = np.sqrt( ( Gb / tb) * (  (1/ (Ea*hp) ) + (3/ (E * t))  )) # [2]
-        # shearLagS0 =np.sqrt (( Gb / tb) * (  (1/ (Ea*hp) ) + (1/ (E * t))  )) # [2]
-        
-        # tau =( shai/ (shai+alpha)) * ( hp /a) * E*esia # [1] and following
-        # tauS0 = tau* (1- 1/np.cosh(shearLagS0*a))
-        # tauA0 = tau* (1- 1/np.cosh(shearLagA0*a))
-        return abs(tauS0), abs(tauA0)
     
 
 class tip_Displacement:
@@ -454,7 +434,7 @@ class Displacement_Field_FEM:
             Amp_SS = (Ns)*(ks/dss) # Matrix 2*2 ; fraction of equ 23
             Hs=self._equations.HankelMatrix_waveField (ks,self._equations.obs_r) # Matrix 2*2 # Eq 23
             Const_S = np.matmul(Hs,Amp_SS )
-            T_S=self._equations.S0_Stress_from_FEM(self._equations.Freq[i])#self._equations.Stress_function(ks,self._equations.a )# to check
+            T_S=self._equations.S0_Stress_from_optimized(self._equations.Freq[i])#self._equations.Stress_function(ks,self._equations.a )# to check
             Dis_S1[i]=Const_S.dot((T_S))[0]#*self.tw_r[i]
             Dis_S2[i]=Const_S.dot((T_S))[1]#*self.tw_z[i]
         return Dis_S1,Dis_S2
@@ -469,7 +449,7 @@ class Displacement_Field_FEM:
             Amp_AA = (Na)*(ka/daa) # Matrix 2*2
             Ha=self._equations.HankelMatrix_waveField (ka,self._equations.obs_r)
             Const_A = np.matmul(Ha,Amp_AA )
-            T_A=self._equations.A0_Stress_from_FEM(self._equations.Freq[i])#self._equations.Stress_function(ka,self._equations.a )
+            T_A=self._equations.A0_Stress_from_optimized(self._equations.Freq[i])#self._equations.Stress_function(ka,self._equations.a )
             Dis_A1[i]=Const_A.dot((T_A))[0]#*self.tw_r[i]
             Dis_A2[i]=Const_A.dot((T_A))[1]#*self.tw_z[i]
         return Dis_A1,Dis_A2
@@ -614,7 +594,7 @@ if __name__=='__main__':
     # graph.figureplot(Try._equations.Freq,abs(Utip2), ax=axes)
     # print(abs(Utip))
     # Try.plottingWaveNumber()
-    Try=Displacement_Field_Avarage()
+    Try=Displacement_Field_FEM()
     Try.Hybrid_Displacement(isPlotting=True)
     # Try.constan_term()
     plt.show()

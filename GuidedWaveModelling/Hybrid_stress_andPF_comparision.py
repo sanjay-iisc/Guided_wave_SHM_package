@@ -1,6 +1,7 @@
 from matplotlib import markers
 import numpy as np
 import Hybridmodel as HM
+import PinForce as PF
 import Figure_plot as graph
 import matplotlib.pyplot as plt
 import scipy.special 
@@ -22,7 +23,12 @@ a=Model._tipDisp._equations.a
 # Admittance term
 Aw=Model.constan_term(isPlotting=False)
 fAw=interp1d(x,Aw)
-
+Model._tipDisp._equations.plottingWaveNumber()
+saveFigure='E:\PPT\Presentation\Optimization\\GenenticAlgo\Figure\\'
+#-----PF Model
+PF_model=PF.Displacement_Field_PF()
+    
+_,_,pf_tS,pf_tA=PF_model.PF_Displacement(isPlotting=False)
 
 path ="E:\\Work\Work\\Nicolas_opti_results\\"
 tr=[]
@@ -70,20 +76,30 @@ y4=0.41
 t_z_S0=0.13*np.array(tz)*fAw(F)*jv(y2,Ks*a*y3)*(Ks*a)**y4
 t_z_A0=0.13*np.array(tz)*fAw(F)*jv(y2,Ka*a*y3)*(Ka*a)**y4
 
+
+np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSR_optimized.npy",abs(t_r_S0))
+np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAR_optimized.npy",abs(t_r_A0))
+
+np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSZ_optimized.npy",abs(t_z_S0))
+np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAZ_optimized.npy",abs(t_z_A0))
+
 fig,axes = plt.subplots(1,2, sharey=True)
-graph.figureplot(F, abs(t_r_S0),ax=axes[0], title='S0', ylabel=r'$\tau_{rr}$', label ='HM-optimized', linestyle='None', marker='o')
-graph.figureplot(F, abs(t11_S0(F)),ax=axes[0], title='S0', ylabel=r'$\tau_{rr}$', label ='HM-FEM')
+graph.figureplot(PF_model._equations.Freq, abs(pf_tS[:,0]),ax=axes[0], title='S0', ylabel=r'$\tau_{rr}$', label ='PF') 
+graph.figureplot(F, abs(t_r_S0),ax=axes[0], title='S0', ylabel=r'$\tau_{rr}$', label ='HM-optimized')
+graph.figureplot(F, abs(t11_S0(F)),ax=axes[0], title='S0', ylabel=r'$\tau_{rr}$', label ='FEM', linestyle='None', marker='o')
 
-graph.figureplot(F, abs(t_r_A0),ax=axes[1], title='A0', ylabel=r'$\tau_{rr}$', label ='HM-optimized', linestyle='None', marker='o')
-graph.figureplot(F, abs(t11_A0(F)),ax=axes[1], title='A0', ylabel=r'$\tau_{rr}$', label ='HM-FEM')
+graph.figureplot(PF_model._equations.Freq, abs(pf_tA[:,0]),ax=axes[1], title='A0', ylabel=r'$\tau_{zz}$', label ='PF') 
+graph.figureplot(F, abs(t_r_A0),ax=axes[1], title='A0', ylabel=r'$\tau_{rr}$', label ='HM-optimized')
+graph.figureplot(F, abs(t11_A0(F)),ax=axes[1], title='A0', ylabel=r'$\tau_{rr}$', label ='FEM', linestyle='None',path=saveFigure ,marker='o', filename='tauR')
+
 
 
 fig,axes = plt.subplots(1,2, sharey=True)
-graph.figureplot(F, abs(t_z_S0),ax=axes[0], title='S0', ylabel=r'$\tau_{zz}$', label ='HM-optimized', linestyle='None', marker='o')
-graph.figureplot(F, abs(t22_S0(F)),ax=axes[0], title='S0', ylabel=r'$\tau_{zz}$', label ='HM-FEM')
+graph.figureplot(F, abs(t_z_S0),ax=axes[0], title='S0', ylabel=r'$\tau_{zz}$', label ='HM-optimized')
+graph.figureplot(F, abs(t22_S0(F)),ax=axes[0], title='S0', ylabel=r'$\tau_{zz}$', label ='FEM', linestyle='None', marker='o')
 
-graph.figureplot(F, abs(t_z_A0),ax=axes[1], title='A0', ylabel=r'$\tau_{zz}$', label ='HM-optimized', linestyle='None', marker='o')
-graph.figureplot(F, abs(t22_A0(F)),ax=axes[1], title='A0', ylabel=r'$\tau_{zz}$', label ='HM-FEM')
+graph.figureplot(F, abs(t_z_A0),ax=axes[1], title='A0', ylabel=r'$\tau_{zz}$', label ='HM-optimized')
+graph.figureplot(F, abs(t22_A0(F)),ax=axes[1], title='A0', ylabel=r'$\tau_{zz}$', label ='FEM',path=saveFigure, linestyle='None', marker='o', filename='tauZ')
 
 
 # plt.figure()

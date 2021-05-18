@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import random
 import pandas as pd
 import matplotlib.animation as animation
+import os
+import progressbar
+from time import sleep
 class GeneticAlgorithm_Base:
     """
     firstly defined the vvariable which to be saved.
@@ -12,7 +15,7 @@ class GeneticAlgorithm_Base:
     @classmethod
     def _get_userInputs(cls,f,dim=1,population_size=500,max_intr=1,xlb=[-200,-2,0,-2],
     xUb=[200,2,1,2],Tournament_Selection_Size=2,MUTATION_RATE=0.25,
-    mutant_sigma=[0.5,0.5,0.5,0.5],blx_alpha=0.5
+    mutant_sigma=[0.5,0.05,0.05,0.05],blx_alpha=0.5,NUMBER_OF_ELITE_CHROMOSOMES=1
     ,dir_name_save="E:\Work\Code\Hybrid_sensors_model"):
         cls.population_size=population_size
         cls.max_intr=max_intr
@@ -22,7 +25,7 @@ class GeneticAlgorithm_Base:
         cls.MUTATION_RATE=0.25
         cls.mutant_sigma=mutant_sigma
         cls.blx_alpha=blx_alpha
-        cls.NUMBER_OF_ELITE_CHROMOSOMES=1
+        cls.NUMBER_OF_ELITE_CHROMOSOMES=NUMBER_OF_ELITE_CHROMOSOMES
         cls.Pc=0.9
         cls.dim=dim
         cls.f=f
@@ -194,38 +197,46 @@ class GA_strat:
         # Sorting the Initial Population
         population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
         # Priniting the Initial Population
-        self._print_population(population,0)
-        report={'Fitness':[], 'X0':[],'X1':[],'X2':[]}
+        # self._print_population(population,0)
+        
         generation_number=1
         count=[]
         count.append(generation_number)
         plt.figure()
         ax=plt.gca()
+        bar=self.bar_notation()
         # line, = ax.plot([], [], lw=2)
         while generation_number< GeneticAlgorithm_Base.max_intr:
             population=GeneticAlgorithm().evolve(population)
             population.get_chromosomes().sort(key=lambda x:x.get_fitness(), reverse=False)
             #--------------------------------saving the data-------------------------
-            report['Fitness'].append(population.get_chromosomes()[0].get_fitness())
-            for No_var,Varb in enumerate(np.array(population.get_chromosomes()[0].get_genes())):
-                report['X'+str(No_var)].append((Varb))
             #----------------
             # line=self.setting_line(line)
-            ax.clear()
-            ax.plot(count,report['Fitness'], marker='o', markersize=0.5, c='k')
+            ax.scatter(generation_number,population.get_chromosomes()[0].get_fitness(), marker='o', c='k')
             ax.set_xlabel('# Iter')
             ax.set_ylabel('Fitness Value')
             ax.set_title('Convergance Plot')
-            self._print_population(population,generation_number)
+            # self._print_population(population,generation_number)
             plt.pause(0.01)
+            # print('Minmization -- at the function :',population.get_chromosomes()[0])
             generation_number+=1
             count.append(generation_number)
+            bar.update(generation_number)
+            # sleep(0.1)
             # np.save('Best_solution.csv',[population.get_chromosomes()[0],])
-            print('Minmization -- at the function :',population.get_chromosomes()[0])
+        bar.finish()
+        print('Minmization -- at the function :',population.get_chromosomes()[0])
+        print('----------------------------Finshed---------------------------------------')
         if self.ifsaveReport:
+            os.mkdir(GeneticAlgorithm_Base.dir_name)
+            report={'Fitness':[], 'X0':[],'X1':[],'X2':[],'X3':[]}
+            report['Fitness'].append(population.get_chromosomes()[0].get_fitness())
+            for No_var,Varb in enumerate(np.array(population.get_chromosomes()[0].get_genes())):
+                report['X'+str(No_var)].append((Varb))
             data_best=pd.DataFrame.from_dict(report)
             data_best.to_csv(GeneticAlgorithm_Base.dir_name+'\\'+'Best_solution.csv')
-    
+            plt.savefig(GeneticAlgorithm_Base.dir_name+'\\'+'Convergence.png')
+            print('-----------Report Finished---------------------------------------------')
     def setting_line(self,line):
         line.set_data([], [])
         return line,
@@ -237,5 +248,10 @@ class GA_strat:
         i=0
         for x in pop.get_chromosomes():
             print("Chromosome #",i,":", x, "| fitness :", x.get_fitness())
+            i+=1
 
-
+    def bar_notation(self):
+        bar = progressbar.ProgressBar(maxval=GeneticAlgorithm_Base.max_intr, \
+        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.start()
+        return bar

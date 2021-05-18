@@ -441,6 +441,7 @@ class Displacement_Field_PF:
         """ if is stress is 1 then stress multiply by hp else 0 it is without hp multiply"""
         Dis_S1=np.zeros_like(omega, dtype=complex)
         Dis_S2=np.zeros_like(omega, dtype=complex)
+        stress_value=np.zeros((len(omega),2),dtype=complex)
         #ur and uz
         for i, ks in enumerate(k):
             dss=self._equations.ds_dash(ks, omega[i])#scalar ; denominator of eq 23 of [3]
@@ -451,12 +452,15 @@ class Displacement_Field_PF:
             T_S=self._equations.Stress_function(ks,self._equations.a )# to check
             Dis_S1[i]=Const_S.dot((T_S))[0]*self._equations.KapuriaModel( alpha=1)#self._equations.constant_stress(alpha=1)
             Dis_S2[i]=Const_S.dot((T_S))[1]*self._equations.KapuriaModel( alpha=1)#self._equations.constant_stress(alpha=1)
-        return Dis_S1,Dis_S2
+            stress_value[i][0]=T_S[0]*self._equations.KapuriaModel( alpha=1)
+            stress_value[i][1]=T_S[1]*self._equations.KapuriaModel( alpha=1)
+        return Dis_S1,Dis_S2,stress_value
     ## Antisymmetric Displacement 
     def antisymmetricDisplacement(self,k, omega):
         """ if is stress is 0 then stress multiply by hp else 1 it is without hp multiply"""
         Dis_A1=np.zeros_like(omega, dtype=complex)
         Dis_A2=np.zeros_like(omega, dtype=complex)
+        stress_value=np.zeros((len(omega),2),dtype=complex)
         for i, ka in enumerate(k):
             daa=self._equations.da_dash(ka, omega[i])#one value
             Na=self._equations.N_Antisym( ka ,omega[i]) # matrix 2*2
@@ -466,7 +470,10 @@ class Displacement_Field_PF:
             T_A=self._equations.Stress_function(ka,self._equations.a )
             Dis_A1[i]=Const_A.dot((T_A))[0]*self._equations.KapuriaModel( alpha=3)
             Dis_A2[i]=Const_A.dot((T_A))[1]*self._equations.KapuriaModel( alpha=3)
-        return Dis_A1,Dis_A2
+            stress_value[i][0]=T_A[0]*self._equations.KapuriaModel( alpha=3)
+            stress_value[i][1]=T_A[1]*self._equations.KapuriaModel( alpha=3)
+        return Dis_A1,Dis_A2,stress_value
+    
     def PF_Displacement(self,indexS=[2],indexA=[1], isPlotting=False):
         # n is number of modes
         # unit -(rad/m) * (1/(N/m^2))
@@ -474,11 +481,11 @@ class Displacement_Field_PF:
         for ns in indexS:
             ks=self._equations.K[:,ns]
             w =self._equations.omega
-            Urs,Uzs=self.symDisplacement(ks,w)
+            Urs,Uzs,TSvalue=self.symDisplacement(ks,w)
         for na in indexA:
             ka=self._equations.K[:,na]
             w =self._equations.omega
-            Ura,Uza=self.antisymmetricDisplacement(ka,w)
+            Ura,Uza,TAvalue=self.antisymmetricDisplacement(ka,w)
         if isPlotting:
             fig,axes = plt.subplots(1,2, sharex=True)
             graph.figureplot(self._equations.Freq,abs((Urs*np.pi*1j)/(2*self._equations.Mu)) , ax=axes[0], label='S0-PF',c='k')
@@ -496,7 +503,7 @@ class Displacement_Field_PF:
             graph.figureplot(self._equations.Freq,Displacement_Field_PF.f_UzA0(self._equations.Freq) , ax=axes[1], label='A0-FEM',
             linestyle='None',marker='*',c='r', markersize=1, ylabel='Uz[mm]')
         
-        return (Urs*np.pi*1j)/(2*self._equations.Mu),(Uzs*np.pi*1j)/(2*self._equations.Mu), 
+        return (Urs*np.pi*1j)/(2*self._equations.Mu),(Uzs*np.pi*1j)/(2*self._equations.Mu), TSvalue,TAvalue
         (Ura*np.pi*1j)/(2*self._equations.Mu),(Uza*np.pi*1j)/(2*self._equations.Mu)   # rad -m
 
 class Displacement_Field_PF_effective_Radius:
