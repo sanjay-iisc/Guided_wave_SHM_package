@@ -237,9 +237,7 @@ class GA_strat:
             data_best.to_csv(GeneticAlgorithm_Base.dir_name+'\\'+'Best_solution.csv')
             plt.savefig(GeneticAlgorithm_Base.dir_name+'\\'+'Convergence.png')
             print('-----------Report Finished---------------------------------------------')
-    def setting_line(self,line):
-        line.set_data([], [])
-        return line,
+
     
     def _print_population(self,pop, gen_number):
         print('\n------------------------------------------------')

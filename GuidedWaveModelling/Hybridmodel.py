@@ -597,7 +597,7 @@ if __name__=='__main__':
     Try=Displacement_Field_FEM()
     Try.Hybrid_Displacement(isPlotting=True)
     # Try.constan_term()
-    plt.show()
+    # plt.show()
  
 
 

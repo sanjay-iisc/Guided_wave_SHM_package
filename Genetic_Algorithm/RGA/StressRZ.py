@@ -23,7 +23,7 @@ a=Model._tipDisp._equations.a
 Aw=Model.constan_term(isPlotting=False)
 fAw=interp1d(x,Aw)
 
-for nFreq in np.arange(5, 1000, 10)*1e3:
+for nFreq in np.arange(125, 200, 10)*1e3:
     Rz_waveNumber=pd.read_csv("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\data_stress_RZ_waveNumber.csv")
     stress_KRz=Rz_waveNumber['sigma_RZ[N/mm^2] '+'F='+str(int(nFreq*1e-3))+' [KHz]']
     K_rz=Rz_waveNumber['K[rad/mm]']*1e3
