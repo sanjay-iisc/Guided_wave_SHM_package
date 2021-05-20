@@ -2,7 +2,6 @@
 import sys
 sys.path.append("./")
 import GuidedWaveModelling.Hybridmodel as HM
-import GuidedWaveModelling.PinForce as PF
 import GuidedWaveModelling.Figure_plot as graph
 import matplotlib.pyplot as plt
 import scipy.special 

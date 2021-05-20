@@ -28,7 +28,7 @@ saveFigure='E:\PPT\Presentation\Optimization\\GenenticAlgo\Figure\\'
 #-----PF Model
 PF_model=PF.Displacement_Field_PF()
     
-_,_,pf_tS,pf_tA=PF_model.PF_Displacement(isPlotting=False)
+UPF,pf_tS,pf_tA=PF_model.PF_Displacement(isPlotting=False)
 
 path ="E:\\Work\Work\\Nicolas_opti_results\\"
 tr=[]
@@ -101,7 +101,8 @@ graph.figureplot(F, abs(t22_S0(F)),ax=axes[0], title='S0', ylabel=r'$\tau_{zz}$'
 graph.figureplot(F, abs(t_z_A0),ax=axes[1], title='A0', ylabel=r'$\tau_{zz}$', label ='HM-optimized')
 graph.figureplot(F, abs(t22_A0(F)),ax=axes[1], title='A0', ylabel=r'$\tau_{zz}$', label ='FEM',path=saveFigure, linestyle='None', marker='o', filename='tauZ')
 
-
+plt.figure()
+plt.plot( np.arange(5, 1000, 20),tr)
 # plt.figure()
 # plt.plot(,label ='HM-optimize', linestyle='None', marker='*')
 # plt.plot(F, , label ='FEM')

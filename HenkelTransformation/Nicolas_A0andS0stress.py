@@ -14,7 +14,7 @@ from scipy.interpolate import interp1d
 from scipy import interpolate
 #%%
 def stressRZ(p):
-    path='K:\\LMC\\Sanjay\\Comsolresults\\NicolasResults\\stressnew2' 
+    path='K:\\LMC\\Sanjay\\Comsolresults\\NicolasResults\\StressVariation'#stressnew2' 
     fileName= 'Stress_RZ_'+str(p)+'.csv' # the file is starting from 1
     df = pd.read_csv(os.path.join(path , fileName), skiprows=8)
     ##
@@ -24,7 +24,7 @@ def stressRZ(p):
     R=df['Radius (mm)']
     return R, SigmaRz
 def stressZZ(p):
-    path='K:\\LMC\\Sanjay\\Comsolresults\\NicolasResults\\stressnew2' 
+    path='K:\\LMC\\Sanjay\\Comsolresults\\NicolasResults\\StressVariation'#stressnew2' 
     fileName= 'Stress_ZZ_'+str(p)+'.csv' # the file is starting from 1
     df = pd.read_csv(os.path.join(path , fileName), skiprows=8)
     ##
@@ -124,10 +124,10 @@ if __name__=='__main__':
     fig.axes[0].plot(Freq,abs(np.array(stress_AZ)), linestyle='None', marker='o' )
     fig.axes[1].plot(Freq,abs(np.array(stress_SZ)), linestyle='None', marker='o' )
     # %%
-    np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAR.npy",stress_AR)
-    np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAZ.npy",stress_AZ)
-    np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSR.npy",stress_SR)
-    np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSZ.npy",stress_SZ)
+    # np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAR.npy",stress_AR)
+    # np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAZ.npy",stress_AZ)
+    # np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSR.npy",stress_SR)
+    # np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSZ.npy",stress_SZ)
     plt.show()
     # p=1
     # k,Fk=wavenumber_stress(p)

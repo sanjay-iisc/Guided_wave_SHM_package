@@ -23,7 +23,7 @@ a=Model._tipDisp._equations.a
 Aw=Model.constan_term(isPlotting=False)
 fAw=interp1d(x,Aw)
 
-for nFreq in np.arange(125, 200, 10)*1e3:
+for nFreq in np.arange(250, 500, 1000)*1e3:
     Rz_waveNumber=pd.read_csv("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\data_stress_RZ_waveNumber.csv")
     stress_KRz=Rz_waveNumber['sigma_RZ[N/mm^2] '+'F='+str(int(nFreq*1e-3))+' [KHz]']
     K_rz=Rz_waveNumber['K[rad/mm]']*1e3
@@ -40,11 +40,12 @@ for nFreq in np.arange(125, 200, 10)*1e3:
         return  np.square((stress_KRz-t_r)).sum()/np.square((stress_KRz)).sum()
 
 
-    path="E:\Work\Work\\Nicolas_opti_results_2\RR\\"+"F_"+str(int(nFreq*1e-3))+'_KHz'
+    path="E:\Work\Work\\Nicolas_opti_results_2\\RR\\"+"F_"+str(int(nFreq*1e-3))+'_KHz'
     GA.GeneticAlgorithm_Base._get_userInputs(demo_func,dim=4,max_intr=500,population_size=1000,dir_name_save=path)
     # # print('sa'
     GA1=GA.GA_strat(ifsaveReport=True)
     GA1.RUN()
+    plt.close()
 
 
 

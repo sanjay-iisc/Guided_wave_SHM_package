@@ -502,8 +502,8 @@ class Displacement_Field_PF:
             linestyle='None',marker='*',c='k', markersize=1)
             graph.figureplot(self._equations.Freq,Displacement_Field_PF.f_UzA0(self._equations.Freq) , ax=axes[1], label='A0-FEM',
             linestyle='None',marker='*',c='r', markersize=1, ylabel='Uz[mm]')
-        
-        return (Urs*np.pi*1j)/(2*self._equations.Mu),(Uzs*np.pi*1j)/(2*self._equations.Mu), TSvalue,TAvalue
+        U=[(Urs*np.pi*1j)/(2*self._equations.Mu),(Uzs*np.pi*1j)/(2*self._equations.Mu),(Ura*np.pi*1j)/(2*self._equations.Mu),(Uza*np.pi*1j)/(2*self._equations.Mu)]
+        return U, TSvalue,TAvalue
         (Ura*np.pi*1j)/(2*self._equations.Mu),(Uza*np.pi*1j)/(2*self._equations.Mu)   # rad -m
 
 class Displacement_Field_PF_effective_Radius:

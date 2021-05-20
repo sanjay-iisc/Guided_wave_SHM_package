@@ -42,9 +42,10 @@ def henkelTransformationRZ(f,NU=1):
     # f is function 
     # k is wave number wector
     # Nu is order of the bessel function.
+    H=1e-6
     ht = HankelTransform(    nu= NU,     # The order of the bessel function
-    N = 1024*4,   # Number of steps in the integration
-    h = 1e-6)   # Proxy for "size" of steps in integration
+    N = 1024*3,   # Number of steps in the integration
+    h = H)   # Proxy for "size" of steps in integration
     k = np.logspace(-3,1,400)               # Create a log-spaced array of k from 0.1 to 10.
     Fk = ht.transform(f,k,ret_err=False) # Return the transform of f at k.  
     return k,Fk
@@ -55,9 +56,21 @@ def henkelTransformationZZ(f,NU=0):
     ht = HankelTransform(    nu= NU,     # The order of the bessel function
     N = 1024*8,   # Number of steps in the integration
     h = 1e-7)   # Proxy for "size" of steps in integration
-    k = np.logspace(-2.5,1,400)               # Create a log-spaced array of k from 0.1 to 10.
+    k = np.logspace(-2,1,400)               # Create a log-spaced array of k from 0.1 to 10.
     Fk = ht.transform(f,k,ret_err=False) # Return the transform of f at k.  
     return k,Fk
+def inverse_henkelTransformationZZ(f,NU=0):
+    # f is function 
+    # k is wave number wector
+    # Nu is order of the bessel function.
+    ht = HankelTransform(    nu= NU,     # The order of the bessel function
+    N = 1024*8,   # Number of steps in the integration
+    h = 1e-7, inveres=True)   # Proxy for "size" of steps in integration
+    k = np.logspace(-2,1,400)               # Create a log-spaced array of k from 0.1 to 10.
+    Fk = ht.transform(f,k,ret_err=False) # Return the transform of f at k.  
+    return k,Fk
+
+
 #%%%
 def funStressRZ(r,p, isPlotting=False):
     x,y=stressRZ(p)
@@ -96,7 +109,7 @@ def funStressZZ(r,p, isPlotting=False):
 #%%        
 if __name__=='__main__':
     r = np.linspace(0,7,1000) # interpolating at new x-axis
-    fig, axes=plt.subplots(1,1,sharex=False,sharey=True)
+    fig, axes=plt.subplots(2,2,sharex=False,sharey=True)
     data_max_value=[]
     data_stress_RZ_real={}
     data_stress_ZZ_real={}
@@ -104,37 +117,37 @@ if __name__=='__main__':
     data_stress_ZZ_waveNumber={}
     data_stress_RZ_real['Radius[mm]']=r
     data_stress_ZZ_real['Radius[mm]']=r
-    for p in np.arange(1,200,1):
+    for p in np.arange(10,11,1):
         print('p=',p)
         Freq = np.arange(5, 1000, 5)
-        sigma_rz=funStressRZ(r,p, isPlotting=False)
-        sigma_zz=funStressZZ(r,p, isPlotting=False)
+        sigma_rz=funStressRZ(r,p, isPlotting=True)
+        sigma_zz=funStressZZ(r,p, isPlotting=True)
         data_max_value.append(max(sigma_rz(r)))
-        fig.axes[0].scatter(p,max(sigma_rz(r)),s=1)
-    #     data_stress_RZ_real['sigma_RZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigma_rz(r)
-    #     data_stress_ZZ_real['sigma_ZZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigma_zz(r)
-    #     Krz,sigmak_rz=henkelTransformationRZ(sigma_rz,NU=1)
-    #     Kzz,sigmak_zz=henkelTransformationZZ(sigma_zz,NU=0)
-    #     data_stress_RZ_waveNumber['sigma_RZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigmak_rz
-    #     data_stress_ZZ_waveNumber['sigma_ZZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigmak_zz
+        # fig.axes[0].scatter(p,max(sigma_rz(r)),s=1)
+        data_stress_RZ_real['sigma_RZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigma_rz(r)
+        data_stress_ZZ_real['sigma_ZZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigma_zz(r)
+        Krz,sigmak_rz=henkelTransformationRZ(sigma_rz,NU=1)
+        Kzz,sigmak_zz=henkelTransformationZZ(sigma_zz,NU=0)
+        data_stress_RZ_waveNumber['sigma_RZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigmak_rz
+        data_stress_ZZ_waveNumber['sigma_ZZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigmak_zz
     #     # %%
         
-    #     fig.axes[0].plot(r, sigma_rz(r), label='F='+str(Freq[p-1])+' [KHz]')
-    #     fig.axes[1].plot(Krz,sigmak_rz, linewidth=1, alpha=1, linestyle='-', label='F='+str(Freq[p-1])+' [KHz]')
-    #     fig.axes[2].plot(r, sigma_zz(r), label='F='+str(Freq[p-1])+' [KHz]')
-    #     fig.axes[3].plot(Kzz,sigmak_zz, linewidth=1, alpha=1, linestyle='-', label='F='+str(Freq[p-1])+' [KHz]')
+        fig.axes[0].plot(r, sigma_rz(r), label='F='+str(Freq[p-1])+' [KHz]')
+        fig.axes[1].plot(Krz,sigmak_rz, linewidth=1, alpha=1, linestyle='-', label='F='+str(Freq[p-1])+' [KHz]')
+        fig.axes[2].plot(r, sigma_zz(r), label='F='+str(Freq[p-1])+' [KHz]')
+        fig.axes[3].plot(Kzz,sigmak_zz, linewidth=1, alpha=1, linestyle='-', label='F='+str(Freq[p-1])+' [KHz]')
         
-    #     fig.axes[2].set_xlabel('Radius[mm]')
-    #     fig.axes[3].set_xlabel('WaveNumber[rad/mm]')
-    #     fig.axes[1].set_xlim([0,3])
-    #     fig.axes[3].set_xlim([0,3])
-    #     fig.axes[0].set_ylabel(r'Re($\sigma_{rz}$)'+r'[$N/mm^2$]', fontsize=10)
-    #     fig.axes[2].set_ylabel(r'Re($\sigma_{zz}$)'+r'[$N/mm^2$]', fontsize=10)
-    #     # fig.axes[0].title('F='+str(Freq[p-1])+' [KHz]')
-    #     fig.axes[0].legend()
-    #     fig.axes[1].legend()
-    #     fig.axes[2].legend()
-    #     fig.axes[3].legend()
+        fig.axes[2].set_xlabel('Radius[mm]')
+        fig.axes[3].set_xlabel('WaveNumber[rad/mm]')
+        fig.axes[1].set_xlim([0,3])
+        fig.axes[3].set_xlim([0,3])
+        fig.axes[0].set_ylabel(r'Re($\sigma_{rz}$)'+r'[$N/mm^2$]', fontsize=10)
+        fig.axes[2].set_ylabel(r'Re($\sigma_{zz}$)'+r'[$N/mm^2$]', fontsize=10)
+        # fig.axes[0].title('F='+str(Freq[p-1])+' [KHz]')
+        fig.axes[0].legend()
+        fig.axes[1].legend()
+        fig.axes[2].legend()
+        fig.axes[3].legend()
     # # data_stress_RZ_waveNumber['K[rad/mm]']=Krz
     # # data_stress_ZZ_waveNumber['K[rad/mm]']=Kzz
     # # data_stress_RZ_waveNumber=pd.DataFrame.from_dict(data_stress_RZ_waveNumber)
@@ -142,7 +155,7 @@ if __name__=='__main__':
     # # data_stress_RZ_real=pd.DataFrame.from_dict(data_stress_RZ_real)
     # # data_stress_ZZ_real=pd.DataFrame.from_dict(data_stress_ZZ_real)
     # plt.savefig('E:\PPT\Presentation\\02052021_ppt\Figure\\stress_wavenumber.png')
-    np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\Maxstress.np", np.array(data_max_value))
+    # np.save("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\Maxstress.np", np.array(data_max_value))
     plt.show()
     # data_stress_RZ_waveNumber.to_csv("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\data_stress_RZ_waveNumber.csv")
     # data_stress_ZZ_waveNumber.to_csv("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\data_stress_ZZ_waveNumber.csv")

@@ -24,6 +24,7 @@ from Piezo import freePZTimpedance as freePZT
 from sklearn.linear_model import LinearRegression
 import GuidedWaveModelling.Figure_plot as graph
 ### 
+plt.close()
 class WaveField:
     my_dict_input={"plate_properties":{ "d":(1.5/2)*1e-3,"E":70e9,"nu":0.33,"rho":2700},
 "pzt_properties": {"a":5e-3,"Volt":1,"hp":0.125e-3,"d31":-175e-12,"eps33":1790*8.85*1e-12*(1-1j*0.05)
@@ -344,8 +345,8 @@ class t_w:
         # print('Slope of Yf {}'.format(yf_des))
         ### Equation Described in #[3] at 29
         ## 1j is multiplying because the of yf_des and Y_des is become real but we need imaginar
-        YY1= np.imag(t_w().Bonded_Admittance(self._tipDisp._equations.Freq))-self._tipDisp._equations.omega*y_des
-        YY2= self._tipDisp._equations.omega*yf_des-self._tipDisp._equations.omega*y_des
+        YY1= (t_w().Bonded_Admittance(self._tipDisp._equations.Freq))-1j*self._tipDisp._equations.omega*y_des
+        YY2= 1j*self._tipDisp._equations.omega*yf_des-1j*self._tipDisp._equations.omega*y_des
         # YY1= np.imag(t_w().Bonded_Admittance(self._tipDisp._equations.Freq))-self._tipDisp._equations.omega*1j*yf_des
         # +self._tipDisp._equations.omega*1j*yf_des*0.35**2
         # YY2=self._tipDisp._equations.omega*1j*yf_des*0.35**2
@@ -360,7 +361,7 @@ class t_w:
             fig,axes = plt.subplots(1,1, sharex=True)
             graph.figureplot(t_w()._tipDisp._equations.Freq,abs(abs(YY)/abs(PRHW)),ax=axes, title='YY/PRHW')
             # graph.figureplot(t_w()._tipDisp._equations.Freq,abs(PRHW),ax=axes, title='YY/PRHW')
-        return abs(YY)
+        return abs((YY))
     def Linear_Fit(self,X, Y,Xnew):
         X = X.reshape(-1, 1)  ### making 2d array here
         model = LinearRegression().fit(X, Y)
@@ -595,9 +596,11 @@ if __name__=='__main__':
     # print(abs(Utip))
     # Try.plottingWaveNumber()
     Try=Displacement_Field_FEM()
+    print(Try._equations.C_L)
+    print(Try._equations.C_T)
     Try.Hybrid_Displacement(isPlotting=True)
     # Try.constan_term()
-    # plt.show()
+    plt.show()
  
 
 
