@@ -100,20 +100,16 @@ graph.figureplot(np.arange(5, 1000, 20)*1e3,(tr),ax=axes, linestyle='--',marker=
 
 fig,axes=plt.subplots(1,2, sharey=True)
 #-------------S0------------------------
-graph.figureplot(Freq*1e3,abs(t_r_s0),ax=axes[0], linestyle='-',c='b',ylabel=r'$\tau_r[N-mm^2]$',title='S0', label='HM-Optimized')
-graph.figureplot(Freq*1e3,abs(t_r_s0_mean),ax=axes[0], linestyle='--',marker='*',c='r',ylabel=r'$\tau_r[N-mm^2]$', title='S0',label='HM-Optimized-mean')
-graph.figureplot(PF_model._equations.Freq, abs(pf_tS[:,0]),ax=axes[0], linestyle='-',c='k',ylabel=r'$\tau_r[N-mm^2]$', title='S0',label='PF')
-graph.figureplot(Freq*1e3, abs(t11_S0),ax=axes[0], linestyle='None',marker='*',c='k',ylabel=r'$\tau_r[N-mm^2]$', title='S0',label='FEM')
+pathsave ="E:\PPT\Presentation\Optimization\GenenticAlgo\Figure"
+graph.figureplot(Freq*1e3,abs(t_r_s0),ax=axes[0], linestyle='-',c='b',ylabel=r'$\tau_r[N]$',title='S0', label='HM-Optimized')
+graph.figureplot(Freq*1e3,abs(t_r_s0_mean),ax=axes[0], linestyle='--',marker='*',c='r',ylabel=r'$\tau_r[N]$', title='S0',label='HM-Optimized-mean')
+graph.figureplot(PF_model._equations.Freq, abs(pf_tS[:,0]),ax=axes[0], linestyle='-',c='k',ylabel=r'$\tau_r[N]$', title='S0',label='PF')
+graph.figureplot(Freq*1e3, abs(t11_S0),ax=axes[0], linestyle='None',marker='*',c='k',ylabel=r'$\tau_r[N]$', title='S0',label='FEM')
 #-----A0------------------------------------------
-graph.figureplot(Freq*1e3,abs(t_r_a0),ax=axes[1], linestyle='-',c='b',ylabel=r'$\tau_r[N-mm^2]$',title='A0',label='HM-Optimized')
-graph.figureplot(Freq*1e3,abs(t_r_a0_mean),ax=axes[1], linestyle='--',marker='*',c='r',ylabel=r'$\tau_r[N-mm^2]$', title='A0',label='HM-Optimized-mean')
-graph.figureplot(PF_model._equations.Freq, abs(pf_tA[:,0]),ax=axes[1], linestyle='-',c='k',ylabel=r'$\tau_r[N-mm^2]$', title='A0',label='PF')
-graph.figureplot(Freq*1e3, abs(t11_A0),ax=axes[1], linestyle='None',marker='*',c='k',ylabel=r'$\tau_r[N-mm^2]$', title='A0',label='FEM')
-
-path ="E:\\Work\Work\\Nicolas_opti_results\\"
-
-
-
+graph.figureplot(Freq*1e3,abs(t_r_a0),ax=axes[1], linestyle='-',c='b',ylabel=r'$\tau_r[N]$',title='A0',label='HM-Optimized')
+graph.figureplot(Freq*1e3,abs(t_r_a0_mean),ax=axes[1], linestyle='--',marker='*',c='r',ylabel=r'$\tau_r[N]$', title='A0',label='HM-Optimized-mean')
+graph.figureplot(PF_model._equations.Freq, abs(pf_tA[:,0]),ax=axes[1], linestyle='-',c='k',ylabel=r'$\tau_r[N]$', title='A0',label='PF')
+graph.figureplot(Freq*1e3, abs(t11_A0),ax=axes[1], linestyle='None',marker='*',c='k',ylabel=r'$\tau_r[N]$', title='A0',label='FEM', path=pathsave,filename='trr')
 
 plt.show()
 

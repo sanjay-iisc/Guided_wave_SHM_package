@@ -32,7 +32,7 @@ class WaveField:
     my_dict_waveNumber={'K':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\WaveNumberMatrix.npy")*1e3,
     'Freq':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\Freq_WaveNumberMatrix.npy")*1e6}
 
-    my_dict_stress_parameter={'alpha_r': 1,'beta_r':0,'shearLag_r':0.9,
+    my_dict_stress_parameter={'alpha_r': 1,'beta_r':0,'shearLag_r':1,
     'alpha_z': 1.17,'beta_z':0.41,'shearLag_z':0.92,'zeta':0}
     
     def __init__(self):

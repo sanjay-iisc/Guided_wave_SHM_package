@@ -32,6 +32,7 @@ def figureplot(x,y,ax=None,**keyword):
         ax.legend()
         ax.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
         ax.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
+        ax.grid(True)
         for a in A :
             if a == 'title':
                 ax.set_title(Title, fontsize=10)

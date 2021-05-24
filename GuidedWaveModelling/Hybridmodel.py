@@ -7,6 +7,7 @@
 
 from __future__ import division
 import sys
+from pandas.io.parsers import read_csv
 sys.path.append("./")
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from math import log, ceil, inf
@@ -30,13 +31,13 @@ class WaveField:
 "pzt_properties": {"a":5e-3,"Volt":1,"hp":0.125e-3,"d31":-175e-12,"eps33":1790*8.85*1e-12*(1-1j*0.05)
 ,"rhoPiezo":7750,"nu_p":0.35,"s11e":16.4e-12}}#*(1-1j*0.05)
 
-    my_dict_waveNumber={'K':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\WaveNumberMatrix.npy")*1e3,
-    'Freq':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\Freq_WaveNumberMatrix.npy")*1e6}
+    my_dict_waveNumber={'K':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\WaveNumberMatrix.npy")[:-50,:]*1e3,
+    'Freq':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\Freq_WaveNumberMatrix.npy")[:-50]*1e6}
 
     my_dict_stress_parameter={'alpha_r': 1.11,'beta_r':-0.22,'shearLag_r':0.93,
     'alpha_z': 1.17,'beta_z':0.41,'shearLag_z':0.92,'zeta':0.14}
 
-    def __init__(self):
+    def __init__(self, isHMstress_opt=True):
         for name in WaveField.my_dict_input:
             for key in WaveField.my_dict_input[name]:
                 setattr(self, key, WaveField.my_dict_input[name][key])
@@ -47,6 +48,17 @@ class WaveField:
         for key in WaveField.my_dict_stress_parameter:
             setattr(self, key, WaveField.my_dict_stress_parameter[key])
         
+        if isHMstress_opt:
+            pathOpt="K:\LMC\Sanjay\Code\Optimization\optimization_stress\Optimized_stress_const_RR\\"
+            print('Impoting the otptimized data for stress')
+            self.Trr_opt=pd.read_csv(pathOpt+'stress_RR_optimised.csv')
+            self.Tzz_opt=pd.read_csv(pathOpt+'stress_ZZ_optimised.csv')
+
+
+            
+
+
+
         self.omega=2*np.pi*self.Freq #rad/s
         self.obs_r=25e-3
         self.saveFigure='E:\PPT\Presentation\\02052021_ppt\Figure\\'
@@ -244,16 +256,18 @@ class WaveField:
         return Mat_stress   
 
     def S0_Stress_from_optimized(self,f):
-        FemFreq =np.arange(5, 1000, 20)*1e3
-        t11=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSR_optimized.npy"))
-        t22=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressSZ_optimized.npy"))
+        t11=interp1d(self.Trr_opt['Freq[Hz]'] ,self.Trr_opt['trS0'].str.replace('i','j').apply(lambda x: np.complex128(x))
+)
+        t22=interp1d(self.Tzz_opt['Freq[Hz]'],self.Tzz_opt['tzS0'].str.replace('i','j').apply(lambda x: np.complex128(x))
+)
         stressMatrix = np.array ([t11(f) , t22(f)],dtype = complex)
         Mat_stress=stressMatrix.reshape((2,1))
         return Mat_stress
     def A0_Stress_from_optimized(self,f):
-        FemFreq = np.arange(5, 1000, 20)*1e3
-        t11=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAR_optimized.npy"))
-        t22=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\stressAZ_optimized.npy"))
+        t11=interp1d(self.Trr_opt['Freq[Hz]'] ,self.Trr_opt['trA0'].str.replace('i','j').apply(lambda x: np.complex128(x))
+)
+        t22=interp1d(self.Tzz_opt['Freq[Hz]'],self.Tzz_opt['tzA0'].str.replace('i','j').apply(lambda x: np.complex128(x))
+)
         stressMatrix = np.array ([t11(f) , t22(f)],dtype = complex)
         Mat_stress=stressMatrix.reshape((2,1))
         return Mat_stress   
@@ -396,6 +410,42 @@ class t_w:
          xlabel='F[Hz]', ylabel='$|Y|[\Omega^{-1}]$', title ='Admittance curve for hp=125'+r'$\mu mm$',
          linestyle='None', marker='o', markersize=2, label ='Imag-Unbonded')
 
+class Displacment_field:
+    def __init__(self):
+        self._equations=WaveField()
+    ## Symmetric Displacement
+    def symDisplacement(self,k, omega):
+        """ if is stress is 1 then stress multiply by hp else 0 it is without hp multiply"""
+        Dis_S1=np.zeros_like(omega, dtype=complex)
+        Dis_S2=np.zeros_like(omega, dtype=complex)
+        #ur and uz
+        for i, ks in enumerate(k):
+            dss=self._equations.ds_dash(ks, omega[i])#scalar ; denominator of eq 23 of [3]
+            Ns=self._equations.N_sym( ks ,omega[i]) # matrix 2*2; numerator of eq 23 of [3]
+            Amp_SS = (Ns)*(ks/dss) # Matrix 2*2 ; fraction of equ 23
+            Hs=self._equations.HankelMatrix_waveField (ks,self._equations.obs_r) # Matrix 2*2 # Eq 23
+            Const_S = np.matmul(Hs,Amp_SS )
+            T_S=self._equations.S0_Stress_from_optimized(self._equations.Freq[i])#self._equations.Stress_function(ks,self._equations.a )# to check
+            Dis_S1[i]=Const_S.dot((T_S))[0]#*self.tw_r[i]
+            Dis_S2[i]=Const_S.dot((T_S))[1]#*self.tw_z[i]
+        return Dis_S1,Dis_S2
+    
+    ## Antisymmetric Displacement 
+    def antisymmetricDisplacement(self,k, omega):
+        """ if is stress is 0 then stress multiply by hp else 1 it is without hp multiply"""
+        Dis_A1=np.zeros_like(omega, dtype=complex)
+        Dis_A2=np.zeros_like(omega, dtype=complex)
+        for i, ka in enumerate(k):
+            daa=self._equations.da_dash(ka, omega[i])#one value
+            Na=self._equations.N_Antisym( ka ,omega[i]) # matrix 2*2
+            Amp_AA = (Na)*(ka/daa) # Matrix 2*2
+            Ha=self._equations.HankelMatrix_waveField (ka,self._equations.obs_r)
+            Const_A = np.matmul(Ha,Amp_AA )
+            T_A=self._equations.A0_Stress_from_optimized(self._equations.Freq[i])#self._equations.Stress_function(ka,self._equations.a )
+            Dis_A1[i]=Const_A.dot((T_A))[0]#*self.tw_r[i]
+            Dis_A2[i]=Const_A.dot((T_A))[1]#*self.tw_z[i]
+        return Dis_A1,Dis_A2
+
 class Displacement_Field_FEM:
     # Importing FEM results
      #### Importing the Admittance Curve from the FEM
@@ -414,7 +464,7 @@ class Displacement_Field_FEM:
     
 
     def __init__(self):
-        self._equations=WaveField()
+        self._equations=WaveField(isHMstress_opt=True)
         #Importing
         FemFreq = np.arange(5, 1000, 5)*1e3
         FAwR=Spline(FemFreq,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\AwR.npy")*self._equations.a**2*1e6)
@@ -428,6 +478,7 @@ class Displacement_Field_FEM:
         """ if is stress is 1 then stress multiply by hp else 0 it is without hp multiply"""
         Dis_S1=np.zeros_like(omega, dtype=complex)
         Dis_S2=np.zeros_like(omega, dtype=complex)
+        stress_value=np.zeros((len(omega),2),dtype=complex)
         #ur and uz
         for i, ks in enumerate(k):
             dss=self._equations.ds_dash(ks, omega[i])#scalar ; denominator of eq 23 of [3]
@@ -438,12 +489,15 @@ class Displacement_Field_FEM:
             T_S=self._equations.S0_Stress_from_optimized(self._equations.Freq[i])#self._equations.Stress_function(ks,self._equations.a )# to check
             Dis_S1[i]=Const_S.dot((T_S))[0]#*self.tw_r[i]
             Dis_S2[i]=Const_S.dot((T_S))[1]#*self.tw_z[i]
-        return Dis_S1,Dis_S2
+            stress_value[i][0]=T_S[0]
+            stress_value[i][1]=T_S[1]
+        return Dis_S1,Dis_S2,stress_value
     ## Antisymmetric Displacement 
     def antisymmetricDisplacement(self,k, omega):
         """ if is stress is 0 then stress multiply by hp else 1 it is without hp multiply"""
         Dis_A1=np.zeros_like(omega, dtype=complex)
         Dis_A2=np.zeros_like(omega, dtype=complex)
+        stress_value=np.zeros((len(omega),2),dtype=complex)
         for i, ka in enumerate(k):
             daa=self._equations.da_dash(ka, omega[i])#one value
             Na=self._equations.N_Antisym( ka ,omega[i]) # matrix 2*2
@@ -453,7 +507,9 @@ class Displacement_Field_FEM:
             T_A=self._equations.A0_Stress_from_optimized(self._equations.Freq[i])#self._equations.Stress_function(ka,self._equations.a )
             Dis_A1[i]=Const_A.dot((T_A))[0]#*self.tw_r[i]
             Dis_A2[i]=Const_A.dot((T_A))[1]#*self.tw_z[i]
-        return Dis_A1,Dis_A2
+            stress_value[i][0]=T_A[0]
+            stress_value[i][1]=T_A[1]
+        return Dis_A1,Dis_A2,stress_value
     def Hybrid_Displacement(self,indexS=[2],indexA=[1], isPlotting=False):
         # n is number of modes
         # unit -(rad/m) * (1/(N/m^2))
@@ -461,11 +517,11 @@ class Displacement_Field_FEM:
         for ns in indexS:
             ks=self._equations.K[:,ns]
             w =self._equations.omega
-            Urs,Uzs=self.symDisplacement(ks,w)
+            Urs,Uzs,TS=self.symDisplacement(ks,w)
         for na in indexA:
             ka=self._equations.K[:,na]
             w =self._equations.omega
-            Ura,Uza=self.antisymmetricDisplacement(ka,w)
+            Ura,Uza,TA=self.antisymmetricDisplacement(ka,w)
         if isPlotting:
             
             fig,axes = plt.subplots(1,2, sharex=True,sharey=False)
@@ -486,105 +542,15 @@ class Displacement_Field_FEM:
             linestyle='None',marker='*',c='r')
         #  xlabel='F[Hz]', ylabel='$|Y|[\Omega^{-1}]$', title ='Admittance curve for hp=125'+r'$\mu mm$',
         #  linestyle='None', marker='o', markersize=2, label ='Real-Bonded')
-        return (Urs*np.pi*1j)/(2*self._equations.Mu),(Uzs*np.pi*1j)/(2*self._equations.Mu), 
-        (Ura*np.pi*1j)/(2*self._equations.Mu),(Uza*np.pi*1j)/(2*self._equations.Mu)   # rad -m
-
-#_____________________Average stress-----------------------------------------------
-class Displacement_Field_Avarage:
-    # Importing FEM results
-     #### Importing the Admittance Curve from the FEM
-    
-    Comsol_Path="K:\LMC\Sanjay\Comsolresults\\NicolasResults\\NicolasResults4.csv"
-    Data = pd.read_csv(Comsol_Path, skiprows=4)
-    FemFreq =Data['freq (kHz)'].to_numpy()*1e3 #in Hz
-    UrS0=Data['S0_u']*1e-3 #in m
-    UrA0=Data['A0_u']*1e-3#in m
-    UzS0=Data['S0_w']*1e-3 #in m
-    UzA0=Data['A0_w']*1e-3#in m
-    f_UrS0=interp1d(FemFreq,UrS0)
-    f_UrA0=interp1d(FemFreq,UrA0)
-    f_UzS0=interp1d(FemFreq,UzS0)
-    f_UzA0=interp1d(FemFreq,UzA0)
-    
-
-    def __init__(self):
-        self._equations=WaveField()
-        #Importing
-        FemFreq = np.arange(5, 1000, 5)*1e3
-        FAwR=Spline(FemFreq,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\AwR.npy")*self._equations.a*1e3)
-        FAwZ=Spline(FemFreq,np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\AwZ.npy")*self._equations.a*1e3)
-        # np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\FEMstress\AwZ")
+        U=[(Urs*np.pi*1j)/(2*self._equations.Mu),(Uzs*np.pi*1j)/(2*self._equations.Mu),(Ura*np.pi*1j)/(2*self._equations.Mu),(Uza*np.pi*1j)/(2*self._equations.Mu)]
+        return U, TS,TA
         
-        self.tw_r=FAwR(self._equations.Freq)
-        self.tw_z=FAwZ(self._equations.Freq)
-    ## Symmetric Displacement
-    def symDisplacement(self,k, omega):
-        """ if is stress is 1 then stress multiply by hp else 0 it is without hp multiply"""
-        Dis_S1=np.zeros_like(omega, dtype=complex)
-        Dis_S2=np.zeros_like(omega, dtype=complex)
-        #ur and uz
-        for i, ks in enumerate(k):
-            dss=self._equations.ds_dash(ks, omega[i])#scalar ; denominator of eq 23 of [3]
-            Ns=self._equations.N_sym( ks ,omega[i]) # matrix 2*2; numerator of eq 23 of [3]
-            Amp_SS = (Ns)*(ks/dss) # Matrix 2*2 ; fraction of equ 23
-            Hs=self._equations.HankelMatrix_waveField (ks,self._equations.obs_r) # Matrix 2*2 # Eq 23
-            Const_S = np.matmul(Hs,Amp_SS )
-            T_S=self._equations.Stress_function(ks,self._equations.a )# to check
-            Dis_S1[i]=Const_S.dot((T_S))[0]*self.tw_r[i]
-            Dis_S2[i]=Const_S.dot((T_S))[1]*self.tw_z[i]
-        return Dis_S1,Dis_S2
-    ## Antisymmetric Displacement 
-    def antisymmetricDisplacement(self,k, omega):
-        """ if is stress is 0 then stress multiply by hp else 1 it is without hp multiply"""
-        Dis_A1=np.zeros_like(omega, dtype=complex)
-        Dis_A2=np.zeros_like(omega, dtype=complex)
-        for i, ka in enumerate(k):
-            daa=self._equations.da_dash(ka, omega[i])#one value
-            Na=self._equations.N_Antisym( ka ,omega[i]) # matrix 2*2
-            Amp_AA = (Na)*(ka/daa) # Matrix 2*2
-            Ha=self._equations.HankelMatrix_waveField (ka,self._equations.obs_r)
-            Const_A = np.matmul(Ha,Amp_AA )
-            T_A=self._equations.Stress_function(ka,self._equations.a )
-            Dis_A1[i]=Const_A.dot((T_A))[0]*self.tw_r[i]
-            Dis_A2[i]=Const_A.dot((T_A))[1]*self.tw_z[i]
-        return Dis_A1,Dis_A2
-    def Hybrid_Displacement(self,indexS=[2],indexA=[1], isPlotting=False):
-        # n is number of modes
-        # unit -(rad/m) * (1/(N/m^2))
-        # S mode
-        for ns in indexS:
-            ks=self._equations.K[:,ns]
-            w =self._equations.omega
-            Urs,Uzs=self.symDisplacement(ks,w)
-        for na in indexA:
-            ka=self._equations.K[:,na]
-            w =self._equations.omega
-            Ura,Uza=self.antisymmetricDisplacement(ka,w)
-        if isPlotting:
-            
-            fig,axes = plt.subplots(1,2, sharex=True,sharey=False)
-            graph.figureplot(self._equations.Freq,abs((Urs*np.pi*1j)/(2*self._equations.Mu)) , ax=axes[0], label='S0-Hybrid',c='k')
-            graph.figureplot(self._equations.Freq,abs((Ura*np.pi*1j)/(2*self._equations.Mu)) , ax=axes[0], label='A0-Hybrid',c='r')
-            graph.figureplot(self._equations.Freq,Displacement_Field_Avarage.f_UrS0(self._equations.Freq) , ax=axes[0], label='S0-FEM',
-            linestyle='None',marker='*',c='k')
-            graph.figureplot(self._equations.Freq,Displacement_Field_Avarage.f_UrA0(self._equations.Freq) , ax=axes[0], label='A0-FEM',
-            linestyle='None',marker='*',c='r')
 
 
-            #--------------zzzz
-            graph.figureplot(self._equations.Freq,abs((Uzs*np.pi*1j)/(2*self._equations.Mu)) , ax=axes[1], label='S0-Hybrid',c='k')
-            graph.figureplot(self._equations.Freq,abs((Uza*np.pi*1j)/(2*self._equations.Mu)) , ax=axes[1], label='A0-Hybrid',c='r')
-            graph.figureplot(self._equations.Freq,Displacement_Field_Avarage.f_UzS0(self._equations.Freq) , ax=axes[1], label='S0-FEM',
-            linestyle='None',marker='*',c='k')
-            graph.figureplot(self._equations.Freq,Displacement_Field_Avarage.f_UzA0(self._equations.Freq) , ax=axes[1], label='A0-FEM',
-            linestyle='None',marker='*',c='r')
-        #  xlabel='F[Hz]', ylabel='$|Y|[\Omega^{-1}]$', title ='Admittance curve for hp=125'+r'$\mu mm$',
-        #  linestyle='None', marker='o', markersize=2, label ='Real-Bonded')
-        return (Urs*np.pi*1j)/(2*self._equations.Mu),(Uzs*np.pi*1j)/(2*self._equations.Mu), 
-        (Ura*np.pi*1j)/(2*self._equations.Mu),(Uza*np.pi*1j)/(2*self._equations.Mu)   # rad -m
     
 # driver code
 if __name__=='__main__':
+    # Try1=WaveField()
     # Try=tip_Displacement()
     # Try._equations.plottingWaveNumber()
     # Try._equations.omega
@@ -596,9 +562,9 @@ if __name__=='__main__':
     # print(abs(Utip))
     # Try.plottingWaveNumber()
     Try=Displacement_Field_FEM()
-    print(Try._equations.C_L)
-    print(Try._equations.C_T)
-    Try.Hybrid_Displacement(isPlotting=True)
+    # print(Try._equations.C_L)
+    # print(Try._equations.C_T)
+    U,TA,TS=Try.Hybrid_Displacement(isPlotting=True)
     # Try.constan_term()
     plt.show()
  

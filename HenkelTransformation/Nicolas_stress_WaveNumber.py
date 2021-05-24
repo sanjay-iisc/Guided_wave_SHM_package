@@ -117,11 +117,11 @@ if __name__=='__main__':
     data_stress_ZZ_waveNumber={}
     data_stress_RZ_real['Radius[mm]']=r
     data_stress_ZZ_real['Radius[mm]']=r
-    for p in np.arange(10,11,1):
+    for p in np.arange(10,200,100):
         print('p=',p)
         Freq = np.arange(5, 1000, 5)
-        sigma_rz=funStressRZ(r,p, isPlotting=True)
-        sigma_zz=funStressZZ(r,p, isPlotting=True)
+        sigma_rz=funStressRZ(r,p, isPlotting=False)
+        sigma_zz=funStressZZ(r,p, isPlotting=False)
         data_max_value.append(max(sigma_rz(r)))
         # fig.axes[0].scatter(p,max(sigma_rz(r)),s=1)
         data_stress_RZ_real['sigma_RZ[N/mm^2] '+'F='+str(Freq[p-1])+' [KHz]']=sigma_rz(r)
@@ -148,6 +148,7 @@ if __name__=='__main__':
         fig.axes[1].legend()
         fig.axes[2].legend()
         fig.axes[3].legend()
+    plt.savefig('E:\PPT\Presentation\\02052021_ppt\Figure\\stress_wavenumber.png')
     # # data_stress_RZ_waveNumber['K[rad/mm]']=Krz
     # # data_stress_ZZ_waveNumber['K[rad/mm]']=Kzz
     # # data_stress_RZ_waveNumber=pd.DataFrame.from_dict(data_stress_RZ_waveNumber)

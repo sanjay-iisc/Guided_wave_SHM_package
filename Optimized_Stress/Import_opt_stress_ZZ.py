@@ -22,7 +22,7 @@ fAw=interp1d(freqModel,Aw)
 data={}
 ##---Import the data from the optimization
 # path="K:\LMC\Sanjay\Code\Optimization\\optimization_stress\ZZ\\"
-Freq=np.concatenate((np.arange(5,375,10),np.arange(500,960,10)))
+Freq=np.concatenate((np.arange(5,500,10),np.arange(500,960,10)))
 X0,X1,X2,X3,X4=[],[],[],[],[]
 #--------------------------------------------------
 for nfreq in Freq:
@@ -52,7 +52,7 @@ data['A(w)']=fAw(data['Freq[Hz]'])
 tw=interp1d(data_RR['Freq[Hz]'],data_RR['tr'])(data['Freq[Hz]'])
 #------------Data To save----------------------------------
 Data=pd.DataFrame.from_dict(data)
-# Data.to_csv("K:\LMC\Sanjay\Code\Optimization\optimization_stress\Optimized_stress_const_RR\stress_hyperperameter_ZZ.csv")
+Data.to_csv("K:\LMC\Sanjay\Code\Optimization\optimization_stress\Optimized_stress_const_RR\stress_hyperperameter_ZZ2.csv")
 Data_mean=Data.mean(axis=0)
 Data_Var=Data.var(axis=0)
 print(Data_mean)
