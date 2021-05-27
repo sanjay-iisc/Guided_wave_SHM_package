@@ -454,6 +454,7 @@ class Displacement_Field_PF:
             Dis_S2[i]=Const_S.dot((T_S))[1]*self._equations.KapuriaModel( alpha=1)#self._equations.constant_stress(alpha=1)
             stress_value[i][0]=T_S[0]*self._equations.KapuriaModel( alpha=1)
             stress_value[i][1]=T_S[1]*self._equations.KapuriaModel( alpha=1)
+            print('ts0=',self._equations.KapuriaModel( alpha=1))
         return Dis_S1,Dis_S2,stress_value
     ## Antisymmetric Displacement 
     def antisymmetricDisplacement(self,k, omega):
@@ -548,6 +549,7 @@ class Displacement_Field_PF_effective_Radius:
             T_S=self._equations.Stress_function(ks,self._correction_radius[i]*self._equations.a )# to check
             Dis_S1[i]=((T_S))[0]*self._equations.KapuriaModel( alpha=1)#self._equations.constant_stress(alpha=1)Const_S.dot
             Dis_S2[i]=((T_S))[1]*self._equations.KapuriaModel( alpha=1)#self._equations.constant_stress(alpha=1)
+            print('ts0=',self._equations.KapuriaModel( alpha=1))
         return Dis_S1,Dis_S2
     ## Antisymmetric Displacement 
     def antisymmetricDisplacement(self,k, omega):

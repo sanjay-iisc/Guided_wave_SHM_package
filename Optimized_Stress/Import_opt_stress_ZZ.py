@@ -22,7 +22,7 @@ fAw=interp1d(freqModel,Aw)
 data={}
 ##---Import the data from the optimization
 # path="K:\LMC\Sanjay\Code\Optimization\\optimization_stress\ZZ\\"
-Freq=np.concatenate((np.arange(5,500,10),np.arange(500,960,10)))
+Freq=np.concatenate((np.arange(5,500,10),np.arange(500,1000,10)))
 X0,X1,X2,X3,X4=[],[],[],[],[]
 #--------------------------------------------------
 for nfreq in Freq:

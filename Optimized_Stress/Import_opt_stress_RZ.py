@@ -52,6 +52,7 @@ Data=pd.DataFrame.from_dict(data)
 # Data.to_csv("K:\LMC\Sanjay\Code\Optimization\optimization_stress\Optimized_stress_const_RR\stress_hyperperameter_RR.csv")
 Data_mean=Data.mean(axis=0)
 print(Data_mean)
+print(Data.var(axis=0))
 KS0=interp1d(freqModel,Ks)(data['Freq[Hz]'])
 KA0=interp1d(freqModel,Ka)(data['Freq[Hz]'])
 
@@ -96,7 +97,7 @@ graph.figureplot(Freq*1e3,(X3),ax=axes, linestyle='--',marker='*',title=r'$\beta
 fig,axes=plt.subplots(1,1)
 # graph.figureplot(Freq*1e3,(X0),ax=axes, linestyle='--',marker='*',title=r'$\tau_r$')
 graph.figureplot(Freq*1e3,(X0),ax=axes, linestyle='--',marker='*',title=r'$\tau_r$')
-graph.figureplot(np.arange(5, 1000, 20)*1e3,(tr),ax=axes, linestyle='--',marker='*',title=r'$\tau_r$', label='Era')
+
 
 fig,axes=plt.subplots(1,2, sharey=True)
 #-------------S0------------------------

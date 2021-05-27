@@ -21,6 +21,7 @@ UHM,TS_HMopt,TA_HMopt=Model.Hybrid_Displacement(isPlotting=False)
 PF_model=PF.Displacement_Field_PF()  
 UPF,pf_tS,pf_tA=PF_model.PF_Displacement(isPlotting=False)
 Comsol_Path="K:\LMC\Sanjay\Comsolresults\\NicolasResults\\NicolasResults4.csv"
+pathSavefig="E:\PPT\Presentation\Optimization\\GenenticAlgo\Figure\\"
 Data = pd.read_csv(Comsol_Path, skiprows=4)
 FemFreq =Data['freq (kHz)'].to_numpy()*1e3 #in Hz
 UrS0=Data['S0_u']*1e-3 #in m
@@ -37,7 +38,7 @@ graph.figureplot(FemFreq,abs(UrS0),ax=axes[0], linestyle='None', marker='o', yla
 graph.figureplot(FemFreq,abs(UzS0),ax=axes[1],linestyle='None', marker='o', ylabel=r'$U_{zz}[m]$', markersize=2,label='FEM',c='r')
 #----PF
 graph.figureplot(PF_model._equations.Freq,abs(UPF[0]),ax=axes[0], linestyle='-', ylabel=r'$U_{rr}[m]$', markersize=1,label='PF',c='k')
-graph.figureplot(PF_model._equations.Freq,abs(UPF[1]),ax=axes[1],linestyle='-', ylabel=r'$U_{zz}[m]$', markersize=1,label='PF',c='k')
+graph.figureplot(PF_model._equations.Freq,abs(UPF[1]),ax=axes[1],linestyle='-', ylabel=r'$U_{zz}[m]$', markersize=1,label='PF',c='k',path=pathSavefig,filename='S0_Disp')
 
 fig,axes=plt.subplots(1,2)
 graph.figureplot(Freq,abs(UHM[2]),ax=axes[0], linestyle='None', marker='o', ylabel=r'$U_{rr}[m]$', markersize=3,label='HM-opt',c='b')
@@ -48,7 +49,7 @@ graph.figureplot(FemFreq,abs(UrA0),ax=axes[0], linestyle='None', marker='o', yla
 graph.figureplot(FemFreq,abs(UzA0),ax=axes[1],linestyle='None', marker='o', ylabel=r'$U_{zz}[m]$', markersize=2,label='FEM',c='r')
 #----PF-A0
 graph.figureplot(PF_model._equations.Freq,abs(UPF[2]),ax=axes[0], linestyle='-', ylabel=r'$U_{rr}[m]$', markersize=1,label='PF',c='k')
-graph.figureplot(PF_model._equations.Freq,abs(UPF[3]),ax=axes[1],linestyle='-', ylabel=r'$U_{zz}[m]$', markersize=1,label='PF',c='k')
+graph.figureplot(PF_model._equations.Freq,abs(UPF[3]),ax=axes[1],linestyle='-', ylabel=r'$U_{zz}[m]$', markersize=1,label='PF',c='k',path=pathSavefig,filename='A0_Disp')
 
 
 plt.show()

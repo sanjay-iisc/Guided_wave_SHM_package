@@ -67,14 +67,14 @@ fig,axes=plt.subplots(1,2, sharey=True)
 #-------------S0------------------------
 
 graph.figureplot(Data['Freq[Hz]'],abs(t_z_s0),ax=axes[0], linestyle='-',c='b',ylabel=r'$\tau_z[N]$',title='S0', label='HM-Optimized')
-graph.figureplot(Data['Freq[Hz]'],abs(t_z_s0_mean),ax=axes[0], linestyle='--',marker='*',c='r',ylabel=r'$\tau_z[N]$', title='S0',label='HM-Optimized-mean')
+graph.figureplot(Data['Freq[Hz]'],abs(t_z_s0_mean),ax=axes[0], linestyle='--',marker='*',c='r',ylabel=r'$\tau_z[N]$', title='S0',label='HM-Optimized-mean', alpha=1,markersize=2)
 # graph.figureplot(PF_model._equations.Freq, abs(pf_tS[:,0]),ax=axes[0], linestyle='-',c='k',ylabel=r'$\tau_r[N]$', title='S0',label='PF')
-graph.figureplot(Data['Freq[Hz]'], abs(t11_S0),ax=axes[0], linestyle='None',marker='*',c='k',ylabel=r'$\tau_z[N]$', title='S0',label='FEM')
+graph.figureplot(Data['Freq[Hz]'], abs(t11_S0),ax=axes[0], linestyle='None',marker='o',c='k',ylabel=r'$\tau_z[N]$', title='S0',label='FEM', alpha=1,markersize=2)
 #-----A0------------------------------------------
 graph.figureplot(Data['Freq[Hz]'],abs(t_z_a0),ax=axes[1], linestyle='-',c='b',ylabel=r'$\tau_z[N]$',title='A0',label='HM-Optimized')
-graph.figureplot(Data['Freq[Hz]'],abs(t_z_a0_mean),ax=axes[1], linestyle='--',marker='*',c='r',ylabel=r'$\tau_r[N]$', title='A0',label='HM-Optimized-mean')
+graph.figureplot(Data['Freq[Hz]'],abs(t_z_a0_mean),ax=axes[1], linestyle='--',marker='*',c='r',ylabel=r'$\tau_r[N]$', title='A0',label='HM-Optimized-mean', alpha=1,markersize=2)
 # graph.figureplot(PF_model._equations.Freq, abs(pf_tA[:,0]),ax=axes[1], linestyle='-',c='k',ylabel=r'$\tau_r[N]$', title='A0',label='PF')
-graph.figureplot(Data['Freq[Hz]'], abs(t11_A0),ax=axes[1], linestyle='None',marker='*',c='k',ylabel=r'$\tau_z[N]$', title='A0',label='FEM', path=pathsave,filename='tZZ')
+graph.figureplot(Data['Freq[Hz]'], abs(t11_A0),ax=axes[1], linestyle='None',marker='o',c='k',ylabel=r'$\tau_z[N]$', title='A0',label='FEM', path=pathsave,filename='tZZ', alpha=1,markersize=2)
 isdataSave=True
 
 if isdataSave:
