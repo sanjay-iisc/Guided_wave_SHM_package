@@ -22,9 +22,11 @@ Aw=Model.constan_term(isPlotting=False)
 fAw=interp1d(freqModel,Aw)
 Data= pd.read_csv("K:\LMC\Sanjay\Code\Optimization\optimization_stress\Optimized_stress_const_RR\\stress_hyperperameter_RR.csv")
 Data_mean=Data.mean(axis=0)
-isdataSave=True
+isdataSave=False
 print(Data_mean)
 print(Data.var(axis=0))
+# print(freqModel)
+# print(Data['Freq[Hz]'])
 KS0=interp1d(freqModel,Ks)(Data['Freq[Hz]'])
 KA0=interp1d(freqModel,Ka)(Data['Freq[Hz]'])
 
@@ -47,7 +49,7 @@ t11_S0=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\\calcul_modal\\Nicolas
 t11_A0=Spline(FemFreq ,np.load("E:\Work\Code\matlabJordan\\calcul_modal\\NicolasPlate\stressAR.npy"))(Data['Freq[Hz]'])
 
 
-pathsave ="E:\PPT\Presentation\Optimization\GenenticAlgo\Figure\\"
+pathsave ="E:\PPT\Presentation\\_01062021_ppt\Figure\\"
 fig,axes=plt.subplots(3,1, sharex=True)
 graph.figureplot(Data['Freq[Hz]'],Data['alpha'],ax=axes[0], linestyle='--',marker='o',label=r'$\alpha_r$',c='k', title='Hyper-Parameters-'+r'$\tau_{rr}$', markersize=2)
 
@@ -58,9 +60,11 @@ graph.figureplot(Data['Freq[Hz]'],Data['gamma'],ax=axes[1], linestyle='--',marke
 graph.figureplot(Data['Freq[Hz]'],Data['beta'],ax=axes[2], linestyle='--',marker='o',label=r'$\beta_r$',c='b',path=pathsave,filename='hyper_trr', markersize=2)
 
 
-# fig,axes=plt.subplots(1,1)
+fig,axes=plt.subplots(1,1)
 # graph.figureplot(Freq*1e3,(X0),ax=axes, linestyle='--',marker='*',title=r'$\tau_r$')
-# graph.figureplot(Data['Freq[Hz]'],(X0),ax=axes, linestyle='--',marker='*',title=r'$\tau_r$')
+graph.figureplot(Data['Freq[Hz]'],Data['tr'],ax=axes, ylabel=r'$\tau_r(\omega)$',linestyle='--',marker='o',path=pathsave,filename='tw')
+fig,axes=plt.subplots(1,1)
+graph.figureplot(Data['Freq[Hz]'],fAw(Data['Freq[Hz]']),ax=axes, ylabel=r'$A(\omega)$',linestyle='--',marker='o',path=pathsave,filename='Aw')
 # graph.figureplot(np.arange(5, 1000, 20)*1e3,(tr),ax=axes, linestyle='--',marker='*',title=r'$\tau_r$', label='Era')
 
 fig,axes=plt.subplots(1,2, sharey=True)

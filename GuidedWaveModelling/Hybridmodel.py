@@ -31,8 +31,8 @@ class WaveField:
 "pzt_properties": {"a":5e-3,"Volt":1,"hp":0.125e-3,"d31":-175e-12,"eps33":1790*8.85*1e-12*(1-1j*0.05)
 ,"rhoPiezo":7750,"nu_p":0.35,"s11e":16.4e-12}}#*(1-1j*0.05)
 
-    my_dict_waveNumber={'K':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\WaveNumberMatrix.npy")[:-50,:]*1e3,
-    'Freq':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\Freq_WaveNumberMatrix.npy")[:-50]*1e6}
+    my_dict_waveNumber={'K':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\WaveNumberMatrix.npy")[:-5,:]*1e3,
+    'Freq':np.load("E:\Work\Code\matlabJordan\calcul_modal\\NicolasPlate\Freq_WaveNumberMatrix.npy")[:-5]*1e6}
 
     my_dict_stress_parameter={'alpha_r': 1.11,'beta_r':-0.22,'shearLag_r':0.93,
     'alpha_z': 1.17,'beta_z':0.41,'shearLag_z':0.92,'zeta':0.14}

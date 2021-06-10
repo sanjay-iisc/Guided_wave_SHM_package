@@ -317,11 +317,11 @@ class WaveField:
 
         sigma2 = Beta*tau*np.cosh(tau*self.a)
 
-        
+        # print(abs(tau))
         sigma =(sigma1/sigma2)
         avg=np.sum(abs(sigma))/len(sigma) # avarage stresss
         # print(avg)
-        return avg*self.a*self.a
+        return avg#*self.a**2
 
 class affective_radius:
     #### Importing the Admittance Curve from the FEM
@@ -613,6 +613,7 @@ if __name__=='__main__':
     Try=Displacement_Field_PF()
     
     Try.PF_Displacement(isPlotting=True)
+    print(Try._equations.Mu)
     # Try.constan_term()
     # Try=affective_radius()
     # Try.plotting_measured_Admittance()
